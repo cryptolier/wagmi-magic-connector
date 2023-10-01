@@ -85,24 +85,29 @@ export class DedicatedWalletConnector extends MagicConnector {
         }
         // open the modal and process the magic login steps
         if (!this.isModalOpen) {
-            const modalOutput = await this.getUserDetailsByForm(this.enableSMSLogin, this.enableEmailLogin, this.oauthProviders);
+            // const modalOutput = await this.getUserDetailsByForm(
+            //   this.enableSMSLogin,
+            //   this.enableEmailLogin,
+            //   this.oauthProviders,
+            // )
             const magic = this.getMagicSDK();
             // LOGIN WITH MAGIC USING OAUTH PROVIDER
-            if (modalOutput.oauthProvider)
-                await magic.oauth.loginWithRedirect({
-                    provider: modalOutput.oauthProvider,
-                    redirectURI: this.oauthCallbackUrl || window.location.href,
-                });
+            // if (modalOutput.oauthProvider)
+            //   await magic.oauth.loginWithRedirect({
+            //     provider: modalOutput.oauthProvider,
+            //     redirectURI: this.oauthCallbackUrl || window.location.href,
+            //   })
             // LOGIN WITH MAGIC USING EMAIL
-            if (modalOutput.email)
-                await magic.auth.loginWithMagicLink({
-                    email: modalOutput.email,
+            const inputEmail = document.querySelector("input[name='email']");
+            if (inputEmail && inputEmail.value)
+                await magic.auth.loginWithEmailOTP({
+                    email: inputEmail.value,
                 });
             // LOGIN WITH MAGIC USING PHONE NUMBER
-            if (modalOutput.phoneNumber)
-                await magic.auth.loginWithSMS({
-                    phoneNumber: modalOutput.phoneNumber,
-                });
+            // if (modalOutput.phoneNumber)
+            //   await magic.auth.loginWithSMS({
+            //     phoneNumber: modalOutput.phoneNumber,
+            //   })
             if (await magic.user.isLoggedIn())
                 return {
                     account: await this.getAccount(),
