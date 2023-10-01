@@ -49,6 +49,7 @@ export class DedicatedWalletConnector extends MagicConnector {
                 extensions: [new OAuthExtension()],
             });
         }
+        this.magicSDK.preload();
         return this.magicSDK;
     }
     /**
