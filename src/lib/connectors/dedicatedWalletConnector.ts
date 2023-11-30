@@ -152,15 +152,18 @@ export class DedicatedWalletConnector extends MagicConnector {
       //     phoneNumber: modalOutput.phoneNumber,
       //   })
 
-      if (await magic.user.isLoggedIn())
-        return {
-          account: await this.getAccount(),
-          chain: {
-            id: chainId,
-            unsupported: false,
-          },
-          provider,
-        }
+      try {
+        if (await magic.user.isLoggedIn())
+          return {
+            account: await this.getAccount(),
+            chain: {
+              id: chainId,
+              unsupported: false,
+            },
+            provider,
+          }
+      }
+      catch { }
     }
     throw new UserRejectedRequestError(Error('User Rejected Request'))
   }
