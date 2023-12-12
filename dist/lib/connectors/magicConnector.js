@@ -78,7 +78,8 @@ export class MagicConnector extends Connector {
     async disconnect() {
         try {
             const magic = this.getMagicSDK();
-            await magic?.wallet.disconnect();
+            console.log('start logout', magic);
+            await magic?.user.logout();
             this.emit('disconnect');
         }
         catch (error) {
