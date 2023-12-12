@@ -79,10 +79,7 @@ export class MagicConnector extends Connector {
     async disconnect() {
         try {
             const magic = this.getMagicSDK();
-<<<<<<< Updated upstream
-=======
             console.log('start logout2', magic);
->>>>>>> Stashed changes
             await magic?.wallet.disconnect();
             this.emit('disconnect');
         }
