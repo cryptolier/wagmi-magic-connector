@@ -73,11 +73,16 @@ export class MagicConnector extends Connector {
         throw new Error('Chain ID is not defined');
     }
     onDisconnect() {
+        console.log('start onDisconnect()', magic);
         this.emit('disconnect');
     }
     async disconnect() {
         try {
             const magic = this.getMagicSDK();
+<<<<<<< Updated upstream
+=======
+            console.log('start logout2', magic);
+>>>>>>> Stashed changes
             await magic?.wallet.disconnect();
             this.emit('disconnect');
         }
