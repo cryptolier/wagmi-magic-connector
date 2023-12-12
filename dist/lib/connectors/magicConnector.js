@@ -73,7 +73,7 @@ export class MagicConnector extends Connector {
         throw new Error('Chain ID is not defined');
     }
     onDisconnect() {
-        console.log('start onDisconnect()', magic);
+        console.log('start onDisconnect()');
         this.emit('disconnect');
     }
     async disconnect() {
