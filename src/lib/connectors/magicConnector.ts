@@ -95,16 +95,19 @@ export abstract class MagicConnector extends Connector {
   }
 
   protected onDisconnect(): void {
+    console.log('start onDisconnect()');
     this.emit('disconnect')
   }
 
   async disconnect(): Promise<void> {
     try {
+      console.log('start logout1');
       const magic = this.getMagicSDK()
-      console.log('start logout', magic)
-      await magic?.user.logout()
+      console.log('start logout2', magic);
+      await magic?.wallet.disconnect()
       this.emit('disconnect')
     } catch (error) {
+      console.log('start logout error', error);
       console.error('Error disconnecting from Magic SDK:', error)
     }
   }
