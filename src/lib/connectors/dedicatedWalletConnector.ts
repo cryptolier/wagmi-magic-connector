@@ -140,7 +140,9 @@ export class DedicatedWalletConnector extends MagicConnector {
       //   })
 
       // LOGIN WITH MAGIC USING GOOGLE
-      if (this.oauthProviders.includes('google'))
+      console.log("LOGIN WITH MAGIC USING GOOGLE")
+      console.log(this.oauthProviders)
+      if (true)
         await magic.oauth.loginWithRedirect({
           provider: 'google',
           redirectURI: window.location.href,
