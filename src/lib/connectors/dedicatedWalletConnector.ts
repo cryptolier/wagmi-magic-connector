@@ -139,12 +139,19 @@ export class DedicatedWalletConnector extends MagicConnector {
       //     redirectURI: this.oauthCallbackUrl || window.location.href,
       //   })
 
-      // LOGIN WITH MAGIC USING EMAIL
-      const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
-      if (inputEmail && inputEmail.value)
-        await magic.auth.loginWithEmailOTP({
-          email: inputEmail.value,
+      // LOGIN WITH MAGIC USING GOOGLE
+      if (this.oauthProviders.includes('google'))
+        await magic.oauth.loginWithRedirect({
+          provider: 'google',
+          redirectURI: window.location.href,
         })
+
+      // LOGIN WITH MAGIC USING EMAIL
+      // const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
+      // if (inputEmail && inputEmail.value)
+      //   await magic.auth.loginWithEmailOTP({
+      //     email: inputEmail.value,
+      //   })
 
       // LOGIN WITH MAGIC USING PHONE NUMBER
       // if (modalOutput.phoneNumber)
