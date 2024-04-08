@@ -135,11 +135,11 @@ export function dedicatedWalletConnector({
       }
 
       if (!isModalOpen) {
-        const modalOutput = await getUserDetailsByForm(
-          enableSMSLogin,
-          enableEmailLogin,
-          oauthProviders,
-        )
+        // const modalOutput = await getUserDetailsByForm(
+        //   enableSMSLogin,
+        //   enableEmailLogin,
+        //   oauthProviders,
+        // )
 
         const magic = getMagicSDK() as InstanceWithExtensions<
           SDKBase,
@@ -147,23 +147,24 @@ export function dedicatedWalletConnector({
         >
 
         // LOGIN WITH MAGIC USING OAUTH PROVIDER
-        if (modalOutput.oauthProvider)
-          await magic.oauth.loginWithRedirect({
-            provider: modalOutput.oauthProvider,
-            redirectURI: oauthCallbackUrl ?? window.location.href,
-          })
+        // if (modalOutput.oauthProvider)
+        //   await magic.oauth.loginWithRedirect({
+        //     provider: modalOutput.oauthProvider,
+        //     redirectURI: oauthCallbackUrl ?? window.location.href,
+        //   })
 
         // LOGIN WITH MAGIC USING EMAIL
-        if (modalOutput.email)
+        const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
+        if (inputEmail && inputEmail.value)
           await magic.auth.loginWithEmailOTP({
-            email: modalOutput.email,
+            email: inputEmail.value,
           })
 
         // LOGIN WITH MAGIC USING PHONE NUMBER
-        if (modalOutput.phoneNumber)
-          await magic.auth.loginWithSMS({
-            phoneNumber: modalOutput.phoneNumber,
-          })
+        // if (modalOutput.phoneNumber)
+        //   await magic.auth.loginWithSMS({
+        //     phoneNumber: modalOutput.phoneNumber,
+        //   })
 
         if (await magic.user.isLoggedIn())
           return {
