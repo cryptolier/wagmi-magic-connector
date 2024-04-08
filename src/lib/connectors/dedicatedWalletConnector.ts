@@ -57,7 +57,7 @@ export function dedicatedWalletConnector({ chains, options }: DedicatedWalletCon
   const registerProviderEventListeners = (
     provider: RPCProviderModule,
     onChainChanged: (chain: string) => void,
-    onDisconnect: () => void,
+    onDisconnect: () => void
   ) => {
     if (provider.on) {
       provider.on('accountsChanged', onAccountsChanged);
@@ -79,7 +79,7 @@ export function dedicatedWalletConnector({ chains, options }: DedicatedWalletCon
   const getUserDetailsByForm = async (
     enableSMSLogin: boolean,
     enableEmailLogin: boolean,
-    oauthProviders: OAuthProvider[],
+    oauthProviders: OAuthProvider[]
   ): Promise<UserDetails> => {
     const output: UserDetails = (await createModal({
       accentColor: options.accentColor,
@@ -131,28 +131,33 @@ export function dedicatedWalletConnector({ chains, options }: DedicatedWalletCon
       }
 
       if (!isModalOpen) {
-        const modalOutput = await getUserDetailsByForm(enableSMSLogin, enableEmailLogin, oauthProviders);
+        // const modalOutput = await getUserDetailsByForm(
+        //   enableSMSLogin,
+        //   enableEmailLogin,
+        //   oauthProviders,
+        // )
 
         const magic = getMagicSDK() as InstanceWithExtensions<SDKBase, OAuthExtension[]>;
 
         // LOGIN WITH MAGIC USING OAUTH PROVIDER
-        if (modalOutput.oauthProvider)
-          await magic.oauth.loginWithRedirect({
-            provider: modalOutput.oauthProvider,
-            redirectURI: oauthCallbackUrl ?? window.location.href,
-          });
+        // if (modalOutput.oauthProvider)
+        //   await magic.oauth.loginWithRedirect({
+        //     provider: modalOutput.oauthProvider,
+        //     redirectURI: oauthCallbackUrl ?? window.location.href,
+        //   })
 
         // LOGIN WITH MAGIC USING EMAIL
-        if (modalOutput.email)
+        const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
+        if (inputEmail && inputEmail.value)
           await magic.auth.loginWithEmailOTP({
-            email: modalOutput.email,
+            email: inputEmail.value,
           });
 
         // LOGIN WITH MAGIC USING PHONE NUMBER
-        if (modalOutput.phoneNumber)
-          await magic.auth.loginWithSMS({
-            phoneNumber: modalOutput.phoneNumber,
-          });
+        // if (modalOutput.phoneNumber)
+        //   await magic.auth.loginWithSMS({
+        //     phoneNumber: modalOutput.phoneNumber,
+        //   })
 
         if (await magic.user.isLoggedIn())
           return {
