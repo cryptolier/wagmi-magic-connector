@@ -146,19 +146,44 @@ export function dedicatedWalletConnector({
           OAuthExtension[]
         >
 
-        // LOGIN WITH MAGIC USING OAUTH PROVIDER
-        // if (modalOutput.oauthProvider)
-        //   await magic.oauth.loginWithRedirect({
-        //     provider: modalOutput.oauthProvider,
-        //     redirectURI: oauthCallbackUrl ?? window.location.href,
-        //   })
+        const rootElement = document.querySelector(".magic-data") as HTMLElement;
+        const magicLoginType = rootElement?.dataset.magicLoginType;
+        const returnUrl = rootElement?.dataset.returnUrl;
+        const isSignup = rootElement?.dataset.isSignup === 'true';
 
-        // LOGIN WITH MAGIC USING EMAIL
-        const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
-        if (inputEmail && inputEmail.value)
-          await magic.auth.loginWithEmailOTP({
-            email: inputEmail.value,
-          })
+        let uri = new URL(oauthCallbackUrl ?? window.location.href);
+        if (returnUrl) {
+          uri.searchParams.append('returnURI', returnUrl);
+        }
+        if (isSignup) {
+          uri.searchParams.append('isSignup', 'true');
+        }
+        const redirectURI = uri.toString();
+
+        if (magicLoginType) {
+          switch (magicLoginType) {
+            case 'magic_email':
+              const inputEmail = document.querySelector("input[name='email']") as HTMLInputElement;
+              if (inputEmail && inputEmail.value) {
+                await magic.auth.loginWithEmailOTP({
+                  email: inputEmail.value,
+                });
+              }
+              break;
+            case 'magic_google':
+              await magic.oauth.loginWithRedirect({
+                provider: "google",
+                redirectURI: redirectURI,
+              });
+              break;
+            case 'magic_twitter':
+              await magic.oauth.loginWithRedirect({
+                provider: "twitter",
+                redirectURI: redirectURI,
+              });
+              break;
+          }
+        }
 
         // LOGIN WITH MAGIC USING PHONE NUMBER
         // if (modalOutput.phoneNumber)
