@@ -29,6 +29,15 @@ export function dedicatedWalletConnector({ chains, options, }) {
         isModalOpen = false;
         return output;
     };
+    const getRedirectResult = async (magic) => {
+        try {
+            return await magic.oauth.getRedirectResult();
+        }
+        catch (error) {
+            console.error("エラー発生@getRedirectResult:", error);
+            return false;
+        }
+    };
     return createConnector((config) => ({
         id,
         type,
@@ -116,7 +125,8 @@ export function dedicatedWalletConnector({ chains, options, }) {
         disconnect: async () => {
             try {
                 const magic = getMagicSDK();
-                await magic?.wallet.disconnect();
+                await magic?.user.logout();
+                localStorage.removeItem('magicRedirectResult');
                 config.emitter.emit('disconnect');
             }
             catch (error) {
@@ -154,9 +164,12 @@ export function dedicatedWalletConnector({ chains, options, }) {
                     return false;
                 }
                 const isLoggedIn = await magic.user.isLoggedIn();
+                const result = await getRedirectResult(magic);
+                if (result) {
+                    localStorage.setItem('magicRedirectResult', JSON.stringify(result));
+                }
                 if (isLoggedIn)
                     return true;
-                const result = await magic.oauth.getRedirectResult();
                 return result !== null;
             }
             catch { }

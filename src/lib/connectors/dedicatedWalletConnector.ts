@@ -102,6 +102,15 @@ export function dedicatedWalletConnector({
     return output
   }
 
+  const getRedirectResult = async(magic: any) => {
+    try {
+      return await magic.oauth.getRedirectResult();
+    }  catch (error) {
+      console.error("エラー発生@getRedirectResult:", error);
+      return false
+    }
+  }
+
   return createConnector((config) => ({
     id,
     type,
@@ -203,7 +212,8 @@ export function dedicatedWalletConnector({
     disconnect: async () => {
       try {
         const magic = getMagicSDK()
-        await magic?.wallet.disconnect()
+        await magic?.user.logout()
+        localStorage.removeItem('magicRedirectResult')
         config.emitter.emit('disconnect')
       } catch (error) {
         console.error('Error disconnecting from Magic SDK:', error)
@@ -241,17 +251,20 @@ export function dedicatedWalletConnector({
           SDKBase,
           OAuthExtension[]
         >
-
         if (!magic) {
           return false
         }
 
         const isLoggedIn = await magic.user.isLoggedIn()
+        const result = await getRedirectResult(magic)
+        if (result) {
+          localStorage.setItem('magicRedirectResult', JSON.stringify(result))
+        }
+
         if (isLoggedIn) return true
 
-        const result = await magic.oauth.getRedirectResult()
         return result !== null
-      } catch {}
+      } catch { }
       return false
     },
 

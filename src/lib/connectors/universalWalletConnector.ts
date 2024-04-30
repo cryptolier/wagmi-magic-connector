@@ -111,7 +111,7 @@ export function universalWalletConnector({
     },
     disconnect: async () => {
       try {
-        await magic?.wallet.disconnect()
+        await magic?.user.logout()
         config.emitter.emit('disconnect')
       } catch (error) {
         console.error('Error disconnecting from Magic SDK:', error)
