@@ -102,12 +102,19 @@ export function dedicatedWalletConnector({
     return output
   }
 
-  const getRedirectResult = async(magic: any) => {
+  interface RedirectResult {
+    success: boolean;
+    data?: any;
+    error?: Error;
+  }
+
+  const getRedirectResult = async (magic: any): Promise<RedirectResult> => {
     try {
-      return await magic.oauth.getRedirectResult();
-    }  catch (error) {
+      const result = await magic.oauth.getRedirectResult();
+      return { success: true, data: result };
+    } catch (error) {
       console.error("エラー発生@getRedirectResult:", error);
-      return false
+      return { success: false, error: error as Error};
     }
   }
 
@@ -245,27 +252,28 @@ export function dedicatedWalletConnector({
       throw new Error('Chain ID is not defined')
     },
 
-    isAuthorized: async () => {
+    async isAuthorized(): Promise<boolean> {
+      const magic = getMagicSDK() as InstanceWithExtensions<SDKBase, OAuthExtension[]>;
+      if (!magic) {
+        return false;
+      }
+
       try {
-        const magic = getMagicSDK() as InstanceWithExtensions<
-          SDKBase,
-          OAuthExtension[]
-        >
-        if (!magic) {
-          return false
+        const isLoggedIn = await magic.user.isLoggedIn();
+        const redirectResult = await getRedirectResult(magic);
+
+        // redirectResultが成功していれば、その結果をlocalStorageに保存
+        if (redirectResult.success) {
+          localStorage.setItem('magicRedirectResult', JSON.stringify(redirectResult.data));
         }
 
-        const isLoggedIn = await magic.user.isLoggedIn()
-        const result = await getRedirectResult(magic)
-        if (result) {
-          localStorage.setItem('magicRedirectResult', JSON.stringify(result))
-        }
+        // ユーザーがログインしている、またはリダイレクト結果が成功していればtrueを返す
+        return isLoggedIn || redirectResult.success;
+      } catch (error) {
+        console.error("認証チェック中にエラーが発生しました:", error);
+      }
 
-        if (isLoggedIn) return true
-
-        return result !== null
-      } catch { }
-      return false
+      return false; // すべてのチェックが失敗した場合はfalseを返す
     },
 
     onAccountsChanged,

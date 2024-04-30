@@ -31,11 +31,12 @@ export function dedicatedWalletConnector({ chains, options, }) {
     };
     const getRedirectResult = async (magic) => {
         try {
-            return await magic.oauth.getRedirectResult();
+            const result = await magic.oauth.getRedirectResult();
+            return { success: true, data: result };
         }
         catch (error) {
             console.error("エラー発生@getRedirectResult:", error);
-            return false;
+            return { success: false, error: error };
         }
     };
     return createConnector((config) => ({
@@ -157,23 +158,25 @@ export function dedicatedWalletConnector({ chains, options, }) {
             }
             throw new Error('Chain ID is not defined');
         },
-        isAuthorized: async () => {
-            try {
-                const magic = getMagicSDK();
-                if (!magic) {
-                    return false;
-                }
-                const isLoggedIn = await magic.user.isLoggedIn();
-                const result = await getRedirectResult(magic);
-                if (result) {
-                    localStorage.setItem('magicRedirectResult', JSON.stringify(result));
-                }
-                if (isLoggedIn)
-                    return true;
-                return result !== null;
+        async isAuthorized() {
+            const magic = getMagicSDK();
+            if (!magic) {
+                return false;
             }
-            catch { }
-            return false;
+            try {
+                const isLoggedIn = await magic.user.isLoggedIn();
+                const redirectResult = await getRedirectResult(magic);
+                // redirectResultが成功していれば、その結果をlocalStorageに保存
+                if (redirectResult.success) {
+                    localStorage.setItem('magicRedirectResult', JSON.stringify(redirectResult.data));
+                }
+                // ユーザーがログインしている、またはリダイレクト結果が成功していればtrueを返す
+                return isLoggedIn || redirectResult.success;
+            }
+            catch (error) {
+                console.error("認証チェック中にエラーが発生しました:", error);
+            }
+            return false; // すべてのチェックが失敗した場合はfalseを返す
         },
         onAccountsChanged,
         onChainChanged(chain) {
