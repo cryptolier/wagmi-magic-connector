@@ -54,7 +54,7 @@ export function universalWalletConnector({ chains, options, }) {
         },
         disconnect: async () => {
             try {
-                await magic?.wallet.disconnect();
+                await magic?.user.logout();
                 config.emitter.emit('disconnect');
             }
             catch (error) {

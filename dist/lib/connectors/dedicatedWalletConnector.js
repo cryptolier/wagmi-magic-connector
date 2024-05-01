@@ -29,6 +29,16 @@ export function dedicatedWalletConnector({ chains, options, }) {
         isModalOpen = false;
         return output;
     };
+    const getRedirectResult = async (magic) => {
+        try {
+            const result = await magic.oauth.getRedirectResult();
+            return { success: true, data: result };
+        }
+        catch (error) {
+            console.error("エラー発生@getRedirectResult:", error);
+            return { success: false, error: error };
+        }
+    };
     return createConnector((config) => ({
         id,
         type,
@@ -116,7 +126,8 @@ export function dedicatedWalletConnector({ chains, options, }) {
         disconnect: async () => {
             try {
                 const magic = getMagicSDK();
-                await magic?.wallet.disconnect();
+                await magic?.user.logout();
+                localStorage.removeItem('magicRedirectResult');
                 config.emitter.emit('disconnect');
             }
             catch (error) {
@@ -147,20 +158,25 @@ export function dedicatedWalletConnector({ chains, options, }) {
             }
             throw new Error('Chain ID is not defined');
         },
-        isAuthorized: async () => {
-            try {
-                const magic = getMagicSDK();
-                if (!magic) {
-                    return false;
-                }
-                const isLoggedIn = await magic.user.isLoggedIn();
-                if (isLoggedIn)
-                    return true;
-                const result = await magic.oauth.getRedirectResult();
-                return result !== null;
+        async isAuthorized() {
+            const magic = getMagicSDK();
+            if (!magic) {
+                return false;
             }
-            catch { }
-            return false;
+            try {
+                const isLoggedIn = await magic.user.isLoggedIn();
+                const redirectResult = await getRedirectResult(magic);
+                // redirectResultが成功していれば、その結果をlocalStorageに保存
+                if (redirectResult.success) {
+                    localStorage.setItem('magicRedirectResult', JSON.stringify(redirectResult.data));
+                }
+                // ユーザーがログインしている、またはリダイレクト結果が成功していればtrueを返す
+                return isLoggedIn || redirectResult.success;
+            }
+            catch (error) {
+                console.error("認証チェック中にエラーが発生しました:", error);
+            }
+            return false; // すべてのチェックが失敗した場合はfalseを返す
         },
         onAccountsChanged,
         onChainChanged(chain) {

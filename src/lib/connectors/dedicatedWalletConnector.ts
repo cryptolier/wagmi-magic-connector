@@ -102,6 +102,22 @@ export function dedicatedWalletConnector({
     return output
   }
 
+  interface RedirectResult {
+    success: boolean;
+    data?: any;
+    error?: Error;
+  }
+
+  const getRedirectResult = async (magic: any): Promise<RedirectResult> => {
+    try {
+      const result = await magic.oauth.getRedirectResult();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error("エラー発生@getRedirectResult:", error);
+      return { success: false, error: error as Error};
+    }
+  }
+
   return createConnector((config) => ({
     id,
     type,
@@ -203,7 +219,8 @@ export function dedicatedWalletConnector({
     disconnect: async () => {
       try {
         const magic = getMagicSDK()
-        await magic?.wallet.disconnect()
+        await magic?.user.logout()
+        localStorage.removeItem('magicRedirectResult')
         config.emitter.emit('disconnect')
       } catch (error) {
         console.error('Error disconnecting from Magic SDK:', error)
@@ -235,24 +252,28 @@ export function dedicatedWalletConnector({
       throw new Error('Chain ID is not defined')
     },
 
-    isAuthorized: async () => {
-      try {
-        const magic = getMagicSDK() as InstanceWithExtensions<
-          SDKBase,
-          OAuthExtension[]
-        >
+    async isAuthorized(): Promise<boolean> {
+      const magic = getMagicSDK() as InstanceWithExtensions<SDKBase, OAuthExtension[]>;
+      if (!magic) {
+        return false;
+      }
 
-        if (!magic) {
-          return false
+      try {
+        const isLoggedIn = await magic.user.isLoggedIn();
+        const redirectResult = await getRedirectResult(magic);
+
+        // redirectResultが成功していれば、その結果をlocalStorageに保存
+        if (redirectResult.success) {
+          localStorage.setItem('magicRedirectResult', JSON.stringify(redirectResult.data));
         }
 
-        const isLoggedIn = await magic.user.isLoggedIn()
-        if (isLoggedIn) return true
+        // ユーザーがログインしている、またはリダイレクト結果が成功していればtrueを返す
+        return isLoggedIn || redirectResult.success;
+      } catch (error) {
+        console.error("認証チェック中にエラーが発生しました:", error);
+      }
 
-        const result = await magic.oauth.getRedirectResult()
-        return result !== null
-      } catch {}
-      return false
+      return false; // すべてのチェックが失敗した場合はfalseを返す
     },
 
     onAccountsChanged,
