@@ -31,7 +31,17 @@ interface DedicatedWalletOptions extends MagicOptions {
 export interface DedicatedWalletConnectorParams extends MagicConnectorParams {
     options: DedicatedWalletOptions;
 }
-export declare function dedicatedWalletConnector({ chains, options, }: DedicatedWalletConnectorParams): import("@wagmi/core").CreateConnectorFn<unknown, {
+export declare function dedicatedWalletConnector({ chains, options, }: DedicatedWalletConnectorParams): (config: {
+    chains: readonly [import("viem").Chain, ...import("viem").Chain[]];
+    emitter: import("@wagmi/core/dist/types/createEmitter").Emitter<import("@wagmi/core").ConnectorEventMap>;
+    storage?: {
+        key: string;
+        getItem: <key_1 extends string, value extends (import("@wagmi/core").StorageItemMap & Record<string, unknown>)[key_1], defaultValue_1 extends value | null | undefined>(key: key_1, defaultValue?: defaultValue_1 | undefined) => (defaultValue_1 extends null ? value | null : value) | Promise<defaultValue_1 extends null ? value | null : value>;
+        setItem: <key_1 extends string, value_1 extends (import("@wagmi/core").StorageItemMap & Record<string, unknown>)[key_1] | null>(key: key_1, value: value_1) => void | Promise<void>;
+        removeItem: (key: string) => void | Promise<void>;
+    } | null | undefined;
+    transports?: Record<number, import("@wagmi/core").Transport> | undefined;
+}) => {
     id: string;
     type: string;
     name: string;
@@ -45,8 +55,8 @@ export declare function dedicatedWalletConnector({ chains, options, }: Dedicated
     getChainId: () => Promise<number>;
     isAuthorized: () => Promise<boolean>;
     onAccountsChanged: (accounts: string[]) => Promise<void>;
-    onChainChanged: (chain: string) => void;
-    onConnect: (connectInfo: import("viem").ProviderConnectInfo) => Promise<void>;
+    onChainChanged(chain: string): void;
+    onConnect(connectInfo: import("viem").ProviderConnectInfo): Promise<void>;
     onDisconnect: () => void;
-}, {}>;
+};
 export {};

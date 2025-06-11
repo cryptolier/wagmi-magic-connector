@@ -29,7 +29,17 @@ interface UniversalWalletConnectorParams {
     chains: readonly Chain[];
     options: UniversalWalletOptions;
 }
-export declare function universalWalletConnector({ chains, options, }: UniversalWalletConnectorParams): import("@wagmi/core").CreateConnectorFn<unknown, {
+export declare function universalWalletConnector({ chains, options, }: UniversalWalletConnectorParams): (config: {
+    chains: readonly [Chain, ...Chain[]];
+    emitter: import("@wagmi/core/dist/types/createEmitter").Emitter<import("@wagmi/core").ConnectorEventMap>;
+    storage?: {
+        key: string;
+        getItem: <key_1 extends string, value extends (import("@wagmi/core").StorageItemMap & Record<string, unknown>)[key_1], defaultValue_1 extends value | null | undefined>(key: key_1, defaultValue?: defaultValue_1 | undefined) => (defaultValue_1 extends null ? value | null : value) | Promise<defaultValue_1 extends null ? value | null : value>;
+        setItem: <key_1 extends string, value_1 extends (import("@wagmi/core").StorageItemMap & Record<string, unknown>)[key_1] | null>(key: key_1, value: value_1) => void | Promise<void>;
+        removeItem: (key: string) => void | Promise<void>;
+    } | null | undefined;
+    transports?: Record<number, import("@wagmi/core").Transport> | undefined;
+}) => {
     id: string;
     name: string;
     type: string;
@@ -41,10 +51,10 @@ export declare function universalWalletConnector({ chains, options, }: Universal
     onAccountsChanged: (accounts: string[]) => Promise<void>;
     getAccounts: () => Promise<`0x${string}`[]>;
     onChainChanged: (chain: string) => void;
-    onConnect: (connectInfo: import("viem").ProviderConnectInfo) => Promise<void>;
+    onConnect(connectInfo: import("viem").ProviderConnectInfo): Promise<void>;
     disconnect: () => Promise<void>;
     isAuthorized: () => Promise<boolean>;
     getChainId: () => Promise<number>;
     onDisconnect: () => void;
-}, {}>;
+};
 export {};
