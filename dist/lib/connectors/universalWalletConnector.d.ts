@@ -29,7 +29,7 @@ interface UniversalWalletConnectorParams {
     chains: readonly Chain[];
     options: UniversalWalletOptions;
 }
-export declare function universalWalletConnector({ chains, options, }: UniversalWalletConnectorParams): (config: {
+export declare function universalWalletConnector({ chains, options }: UniversalWalletConnectorParams): (config: {
     chains: readonly [Chain, ...Chain[]];
     emitter: import("@wagmi/core/dist/types/createEmitter").Emitter<import("@wagmi/core").ConnectorEventMap>;
     storage?: {
@@ -43,18 +43,23 @@ export declare function universalWalletConnector({ chains, options, }: Universal
     id: string;
     name: string;
     type: string;
-    getProvider: () => Promise<(RPCProviderModule & import("web3-core").AbstractProvider) | null>;
-    connect: () => Promise<{
-        accounts: `0x${string}`[];
+    magic: import("@magic-sdk/provider").InstanceWithExtensions<import("@magic-sdk/provider").SDKBase, import("@magic-ext/oauth").OAuthExtension[]> | import("@magic-sdk/provider").InstanceWithExtensions<import("@magic-sdk/provider").SDKBase, import("@magic-sdk/provider").MagicSDKExtensionsOption<string>> | null;
+    getProvider: () => Promise<RPCProviderModule | null>;
+    getAccount: () => Promise<`0x${string}`>;
+    onAccountsChanged: (accounts: string[]) => Promise<void>;
+    connect(): Promise<{
+        accounts: any[];
         chainId: number;
     }>;
-    onAccountsChanged: (accounts: string[]) => Promise<void>;
-    getAccounts: () => Promise<`0x${string}`[]>;
+    getAccounts(): Promise<`0x${string}`[]>;
     onChainChanged: (chain: string) => void;
     onConnect(connectInfo: import("viem").ProviderConnectInfo): Promise<void>;
-    disconnect: () => Promise<void>;
-    isAuthorized: () => Promise<boolean>;
+    disconnect(): Promise<void>;
+    isAuthorized(): Promise<boolean>;
     getChainId: () => Promise<number>;
+    switchChain: ({ chainId }: {
+        chainId: number;
+    }) => Promise<Chain>;
     onDisconnect: () => void;
 };
 export {};

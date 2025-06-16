@@ -29,7 +29,7 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
     type: string;
     isModalOpen: boolean;
     isReady: boolean;
-    getProvider: () => Promise<(import("@magic-sdk/provider/dist/types/modules/rpc-provider").RPCProviderModule & import("web3-core").AbstractProvider) | null>;
+    getProvider: () => Promise<import("@magic-sdk/provider/dist/types/modules/rpc-provider").RPCProviderModule | null>;
     getMagicSDK: () => InstanceWithExtensions<SDKBase, OAuthExtension[]> | InstanceWithExtensions<SDKBase, MagicSDKExtensionsOption<string>> | null;
     getAccount: () => Promise<`0x${string}`>;
     getWalletClient: ({ chainId }?: {
@@ -7520,19 +7520,19 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             [x: `bytes1[${string}]`]: undefined;
             [x: `bytes2[${string}]`]: undefined;
             [x: `bytes3[${string}]`]: undefined;
+            [x: `bytes16[${string}]`]: undefined;
+            [x: `bytes10[${string}]`]: undefined;
             [x: `bytes4[${string}]`]: undefined;
             [x: `bytes5[${string}]`]: undefined;
             [x: `bytes6[${string}]`]: undefined;
             [x: `bytes7[${string}]`]: undefined;
             [x: `bytes8[${string}]`]: undefined;
             [x: `bytes9[${string}]`]: undefined;
-            [x: `bytes10[${string}]`]: undefined;
             [x: `bytes11[${string}]`]: undefined;
             [x: `bytes12[${string}]`]: undefined;
             [x: `bytes13[${string}]`]: undefined;
             [x: `bytes14[${string}]`]: undefined;
             [x: `bytes15[${string}]`]: undefined;
-            [x: `bytes16[${string}]`]: undefined;
             [x: `bytes17[${string}]`]: undefined;
             [x: `bytes18[${string}]`]: undefined;
             [x: `bytes19[${string}]`]: undefined;
@@ -7550,8 +7550,9 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             [x: `bytes31[${string}]`]: undefined;
             [x: `bytes32[${string}]`]: undefined;
             [x: `int[${string}]`]: undefined;
-            [x: `int8[${string}]`]: undefined;
+            [x: `int200[${string}]`]: undefined;
             [x: `int16[${string}]`]: undefined;
+            [x: `int8[${string}]`]: undefined;
             [x: `int24[${string}]`]: undefined;
             [x: `int32[${string}]`]: undefined;
             [x: `int40[${string}]`]: undefined;
@@ -7574,7 +7575,6 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             [x: `int176[${string}]`]: undefined;
             [x: `int184[${string}]`]: undefined;
             [x: `int192[${string}]`]: undefined;
-            [x: `int200[${string}]`]: undefined;
             [x: `int208[${string}]`]: undefined;
             [x: `int216[${string}]`]: undefined;
             [x: `int224[${string}]`]: undefined;
@@ -7583,8 +7583,9 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             [x: `int248[${string}]`]: undefined;
             [x: `int256[${string}]`]: undefined;
             [x: `uint[${string}]`]: undefined;
-            [x: `uint8[${string}]`]: undefined;
+            [x: `uint200[${string}]`]: undefined;
             [x: `uint16[${string}]`]: undefined;
+            [x: `uint8[${string}]`]: undefined;
             [x: `uint24[${string}]`]: undefined;
             [x: `uint32[${string}]`]: undefined;
             [x: `uint40[${string}]`]: undefined;
@@ -7607,7 +7608,6 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             [x: `uint176[${string}]`]: undefined;
             [x: `uint184[${string}]`]: undefined;
             [x: `uint192[${string}]`]: undefined;
-            [x: `uint200[${string}]`]: undefined;
             [x: `uint208[${string}]`]: undefined;
             [x: `uint216[${string}]`]: undefined;
             [x: `uint224[${string}]`]: undefined;
@@ -7622,19 +7622,19 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             bytes1?: undefined;
             bytes2?: undefined;
             bytes3?: undefined;
+            bytes16?: undefined;
+            bytes10?: undefined;
             bytes4?: undefined;
             bytes5?: undefined;
             bytes6?: undefined;
             bytes7?: undefined;
             bytes8?: undefined;
             bytes9?: undefined;
-            bytes10?: undefined;
             bytes11?: undefined;
             bytes12?: undefined;
             bytes13?: undefined;
             bytes14?: undefined;
             bytes15?: undefined;
-            bytes16?: undefined;
             bytes17?: undefined;
             bytes18?: undefined;
             bytes19?: undefined;
@@ -7651,8 +7651,9 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             bytes30?: undefined;
             bytes31?: undefined;
             bytes32?: undefined;
-            int8?: undefined;
+            int200?: undefined;
             int16?: undefined;
+            int8?: undefined;
             int24?: undefined;
             int32?: undefined;
             int40?: undefined;
@@ -7675,7 +7676,6 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             int176?: undefined;
             int184?: undefined;
             int192?: undefined;
-            int200?: undefined;
             int208?: undefined;
             int216?: undefined;
             int224?: undefined;
@@ -7683,8 +7683,9 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             int240?: undefined;
             int248?: undefined;
             int256?: undefined;
-            uint8?: undefined;
+            uint200?: undefined;
             uint16?: undefined;
+            uint8?: undefined;
             uint24?: undefined;
             uint32?: undefined;
             uint40?: undefined;
@@ -7707,7 +7708,6 @@ export declare function magicConnector({ chains, options }: MagicConnectorParams
             uint176?: undefined;
             uint184?: undefined;
             uint192?: undefined;
-            uint200?: undefined;
             uint208?: undefined;
             uint216?: undefined;
             uint224?: undefined;

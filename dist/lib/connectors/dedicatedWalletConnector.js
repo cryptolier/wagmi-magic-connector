@@ -1,12 +1,21 @@
-import { createConnector, normalizeChainId } from '@wagmi/core';
-import { magicConnector, } from './magicConnector.js';
+import { createConnector } from '@wagmi/core';
 import { UserRejectedRequestError, getAddress } from 'viem';
 import { createModal } from '../modal/view.js';
-export function dedicatedWalletConnector({ chains, options, }) {
-    let { id, name, type, isModalOpen, getAccount, getMagicSDK, getProvider, onAccountsChanged, } = magicConnector({
+import { normalizeChainId } from '../utils.js';
+import { magicConnector } from './magicConnector.js';
+export function dedicatedWalletConnector({ chains, options }) {
+    let { id, name, type, isModalOpen, getAccount, getMagicSDK, getProvider, onAccountsChanged } = magicConnector({
         chains,
         options: { ...options, connectorType: 'dedicated' },
     });
+    const magic = getMagicSDK();
+    const registerProviderEventListeners = (provider, onChainChanged, onDisconnect) => {
+        if (provider.on) {
+            provider.on('accountsChanged', onAccountsChanged);
+            provider.on('chainChanged', chain => onChainChanged(chain));
+            provider.on('disconnect', onDisconnect);
+        }
+    };
     const oauthProviders = options.oauthOptions?.providers ?? [];
     const oauthCallbackUrl = options.oauthOptions?.callbackUrl;
     const enableSMSLogin = options.enableSMSLogin ?? false;
@@ -29,12 +38,15 @@ export function dedicatedWalletConnector({ chains, options, }) {
         isModalOpen = false;
         return output;
     };
-    return createConnector((config) => ({
+    return createConnector(config => ({
         id,
         type,
         name,
+        magic,
         getProvider,
-        connect: async function () {
+        getAccount,
+        onAccountsChanged,
+        async connect() {
             if (!options.apiKey) {
                 throw new Error('Magic API Key is not provided.');
             }
@@ -64,7 +76,7 @@ export function dedicatedWalletConnector({ chains, options, }) {
                 //   oauthProviders,
                 // )
                 const magic = getMagicSDK();
-                const rootElement = document.querySelector(".magic-data");
+                const rootElement = document.querySelector('.magic-data');
                 const magicLoginType = rootElement?.dataset.magicLoginType;
                 const returnUrl = rootElement?.dataset.returnUrl;
                 const isSignup = rootElement?.dataset.isSignup === 'true';
@@ -88,13 +100,13 @@ export function dedicatedWalletConnector({ chains, options, }) {
                             break;
                         case 'magic_google':
                             await magic.oauth.loginWithRedirect({
-                                provider: "google",
+                                provider: 'google',
                                 redirectURI: redirectURI,
                             });
                             break;
                         case 'magic_twitter':
                             await magic.oauth.loginWithRedirect({
-                                provider: "twitter",
+                                provider: 'twitter',
                                 redirectURI: redirectURI,
                             });
                             break;
@@ -113,30 +125,26 @@ export function dedicatedWalletConnector({ chains, options, }) {
             }
             throw new UserRejectedRequestError(Error('User Rejected Request'));
         },
-        disconnect: async () => {
+        async disconnect() {
             try {
                 const magic = getMagicSDK();
-                await magic?.wallet.disconnect();
+                await magic?.user.logout();
+                localStorage.removeItem('magicRedirectResult');
                 config.emitter.emit('disconnect');
             }
             catch (error) {
                 console.error('Error disconnecting from Magic SDK:', error);
             }
         },
-        getAccounts: async () => {
+        async getAccounts() {
             const provider = await getProvider();
-            const accounts = (await provider?.request({
-                method: 'eth_accounts',
-            }));
-            return accounts.map((x) => getAddress(x));
+            const accounts = (await provider?.send('eth_accounts', []));
+            return accounts.map(x => getAddress(x));
         },
         getChainId: async () => {
             const provider = await getProvider();
             if (provider) {
-                const chainId = await provider.request({
-                    method: 'eth_chainId',
-                    params: [],
-                });
+                const chainId = await provider.send('eth_chainId', []);
                 return normalizeChainId(chainId);
             }
             const networkOptions = options.magicSdkConfiguration?.network;
@@ -147,6 +155,60 @@ export function dedicatedWalletConnector({ chains, options, }) {
             }
             throw new Error('Chain ID is not defined');
         },
+        switchChain: async function ({ chainId }) {
+            if (!options.networks) {
+                throw new Error('Switch chain not supported: please provide networks in options');
+            }
+            const normalizedChainId = normalizeChainId(chainId);
+            const chain = chains.find(x => x.id === normalizedChainId);
+            if (!chain) {
+                throw new Error(`Unsupported chainId: ${chainId}`);
+            }
+            const network = options.networks.find(x => {
+                if (typeof x === 'object' && x.chainId) {
+                    return normalizeChainId(x.chainId) === normalizedChainId;
+                }
+                if (typeof x === 'string') {
+                    const networkMap = {
+                        mainnet: 1,
+                        sepolia: 11155111,
+                        goerli: 5,
+                    };
+                    const networkId = networkMap[x.toLowerCase()] ?? null;
+                    return networkId !== null && normalizeChainId(networkId) === normalizedChainId;
+                }
+                return normalizeChainId(x) === normalizedChainId;
+            });
+            const provider = (await this.getProvider());
+            if (provider?.off) {
+                provider.off('accountsChanged', this.onAccountsChanged);
+                provider.off('chainChanged', this.onChainChanged);
+                provider.off('disconnect', this.onDisconnect);
+            }
+            const newOptions = {
+                ...options,
+                connectorType: 'dedicated',
+                magicSdkConfiguration: {
+                    ...options.magicSdkConfiguration,
+                    network,
+                },
+            };
+            const { getAccount, getMagicSDK, getProvider, onAccountsChanged } = magicConnector({
+                chains,
+                options: newOptions,
+            });
+            this.getAccount = getAccount;
+            this.magic = getMagicSDK();
+            this.getProvider = getProvider;
+            this.onAccountsChanged = onAccountsChanged;
+            const metadata = await this.magic?.user.getInfo();
+            const account = metadata?.publicAddress;
+            registerProviderEventListeners(this.magic.rpcProvider, this.onChainChanged, this.onDisconnect);
+            this.onChainChanged(chain.id.toString());
+            config.emitter.emit('change', { accounts: [account] });
+            this.onAccountsChanged([account]);
+            return chain;
+        },
         isAuthorized: async () => {
             try {
                 const magic = getMagicSDK();
@@ -156,13 +218,14 @@ export function dedicatedWalletConnector({ chains, options, }) {
                 const isLoggedIn = await magic.user.isLoggedIn();
                 if (isLoggedIn)
                     return true;
-                const result = await magic.oauth.getRedirectResult();
-                return result !== null;
+                // const result = await magic.oauth.getRedirectResult();
+                // if (result) {
+                //   localStorage.setItem('magicRedirectResult', JSON.stringify(result));
+                // }
             }
             catch { }
             return false;
         },
-        onAccountsChanged,
         onChainChanged(chain) {
             const chainId = normalizeChainId(chain);
             config.emitter.emit('change', { chainId });

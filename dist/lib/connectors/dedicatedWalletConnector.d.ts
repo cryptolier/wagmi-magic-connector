@@ -1,5 +1,6 @@
 import type { OAuthExtension, OAuthProvider } from '@magic-ext/oauth';
-import type { MagicSDKAdditionalConfiguration } from '@magic-sdk/provider';
+import type { InstanceWithExtensions, MagicSDKAdditionalConfiguration, SDKBase } from '@magic-sdk/provider';
+import { RPCProviderModule } from '@magic-sdk/provider/dist/types/modules/rpc-provider';
 import { type MagicConnectorParams, type MagicOptions } from './magicConnector.js';
 /**
  * Dedicated Wallet Connector class used to connect to wallet using Dedicated Wallet.
@@ -31,7 +32,7 @@ interface DedicatedWalletOptions extends MagicOptions {
 export interface DedicatedWalletConnectorParams extends MagicConnectorParams {
     options: DedicatedWalletOptions;
 }
-export declare function dedicatedWalletConnector({ chains, options, }: DedicatedWalletConnectorParams): (config: {
+export declare function dedicatedWalletConnector({ chains, options }: DedicatedWalletConnectorParams): (config: {
     chains: readonly [import("viem").Chain, ...import("viem").Chain[]];
     emitter: import("@wagmi/core/dist/types/createEmitter").Emitter<import("@wagmi/core").ConnectorEventMap>;
     storage?: {
@@ -45,16 +46,21 @@ export declare function dedicatedWalletConnector({ chains, options, }: Dedicated
     id: string;
     type: string;
     name: string;
-    getProvider: () => Promise<(import("@magic-sdk/provider/dist/types/modules/rpc-provider").RPCProviderModule & import("web3-core").AbstractProvider) | null>;
-    connect: () => Promise<{
+    magic: InstanceWithExtensions<SDKBase, OAuthExtension[]> | InstanceWithExtensions<SDKBase, import("@magic-sdk/provider").MagicSDKExtensionsOption<string>> | null;
+    getProvider: () => Promise<RPCProviderModule | null>;
+    getAccount: () => Promise<`0x${string}`>;
+    onAccountsChanged: (accounts: string[]) => Promise<void>;
+    connect(): Promise<{
         chainId: number;
         accounts: `0x${string}`[];
     }>;
-    disconnect: () => Promise<void>;
-    getAccounts: () => Promise<`0x${string}`[]>;
+    disconnect(): Promise<void>;
+    getAccounts(): Promise<`0x${string}`[]>;
     getChainId: () => Promise<number>;
+    switchChain: ({ chainId }: {
+        chainId: number;
+    }) => Promise<import("viem").Chain>;
     isAuthorized: () => Promise<boolean>;
-    onAccountsChanged: (accounts: string[]) => Promise<void>;
     onChainChanged(chain: string): void;
     onConnect(connectInfo: import("viem").ProviderConnectInfo): Promise<void>;
     onDisconnect: () => void;

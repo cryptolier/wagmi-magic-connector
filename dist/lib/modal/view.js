@@ -21,10 +21,10 @@ export const createModal = async (props) => {
     ];
     // make providers included in oauthProviders
     const providers = props.oauthProviders
-        ?.map((provider) => {
-        return allProviders.find((p) => p.name === provider);
+        ?.map(provider => {
+        return allProviders.find(p => p.name === provider);
     })
-        .filter((p) => p !== undefined);
+        .filter(p => p !== undefined);
     const phoneNumberRegex = '(\\+|00)[0-9]{1,3}[0-9]{4,14}(?:x.+)?$';
     const emailRegex = '^([a-zA-Z0-9_.-])+(\\+[a-zA-Z0-9-]+)?@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})';
     // MODAL HTML
@@ -60,9 +60,7 @@ export const createModal = async (props) => {
               </button>`
         : ''}
         </form>
-        ${providers &&
-        providers.length > 0 &&
-        (props.enableSMSLogin || props.enableEmailLogin)
+        ${providers && providers.length > 0 && (props.enableSMSLogin || props.enableEmailLogin)
         ? `<div class="Magic__divider">
         &#9135;&#9135;&#9135; OR &#9135;&#9135;&#9135;
         </div>`
@@ -71,7 +69,7 @@ export const createModal = async (props) => {
         ? 'Magic__oauthButtonsContainer Magic__aloneOauthContainer'
         : 'Magic__oauthButtonsContainer'}">
           ${providers
-        ?.map((provider) => {
+        ?.map(provider => {
         return `
                 <button class="Magic__oauthButton" id="MagicOauth${provider?.name}" data-provider="${provider?.name}" >
                   <span class="Magic__oauthButtonIcon">${provider?.icon}</span>
@@ -83,9 +81,7 @@ export const createModal = async (props) => {
     })
         .join('')}
         </div>
-        ${!props.enableEmailLogin &&
-        !props.enableEmailLogin &&
-        providers?.length === 0
+        ${!props.enableEmailLogin && !props.enableEmailLogin && providers?.length === 0
         ? '<div>No Login Methods Configured 😥</div>'
         : ''}
       </div>
@@ -111,7 +107,7 @@ export const createModal = async (props) => {
             overlay.remove();
         }, 200);
     };
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         // FORM CLOSE BUTTON
         document.getElementById('MagicCloseBtn')?.addEventListener('click', () => {
             removeForm();
@@ -123,7 +119,7 @@ export const createModal = async (props) => {
             });
         });
         // EMAIL FORM SUBMIT HANDLER
-        document.getElementById('MagicForm')?.addEventListener('submit', (e) => {
+        document.getElementById('MagicForm')?.addEventListener('submit', e => {
             e.preventDefault();
             const formInputField = document.getElementById('MagicFormInput');
             const isFormValid = formInputField?.checkValidity();
@@ -144,7 +140,7 @@ export const createModal = async (props) => {
             }
         });
         // OAUTH BUTTONS
-        providers?.forEach((provider) => {
+        providers?.forEach(provider => {
             const oauthButton = document.getElementById(`MagicOauth${provider?.name}`);
             oauthButton?.addEventListener('click', () => {
                 const output = {

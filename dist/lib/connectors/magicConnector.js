@@ -29,16 +29,14 @@ export function magicConnector({ chains = [], options }) {
     };
     const getAccount = async () => {
         const provider = await getProvider();
-        const accounts = await provider?.request({
-            method: 'eth_accounts',
-        });
+        const accounts = await provider?.send('eth_accounts', []);
         const account = getAddress(accounts[0]);
         return account;
     };
     const getWalletClient = async ({ chainId } = {}) => {
-        const provider = await getProvider();
+        const provider = (await getProvider());
         const account = await getAccount();
-        const chain = chains.find((x) => x.id === chainId) ?? chains[0];
+        const chain = chains.find(x => x.id === chainId) ?? chains[0];
         if (!provider)
             throw new Error('provider is required.');
         return createWalletClient({
